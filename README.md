@@ -44,6 +44,7 @@ pip install -r requirements.txt
 ```
 DATABASE_URI=
 BCRYPT_ROUNDS=10
+APP_SECRET_KEY=
 YOUTUBE_API_KEY=
 ```
 
