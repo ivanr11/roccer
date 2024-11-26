@@ -1,0 +1,17 @@
+venv
+.vscode
+.DS_Store
+__pycache__
+.pytest_cache
+.env
+static/assets/profile-pics/*.jpg
+static/assets/profile-pics/*.jpeg
+static/assets/profile-pics/*.png
+static/assets/profile-pics/*.gif
+static/assets/post_images/*.jpg
+static/assets/post_images/*.jpeg
+static/assets/post_images/*.png
+static/assets/post_images/*.gif
+static/assets/post_videos/*.mp4
+static/assets/post_videos/*.ogg
+static/assets/post_videos/*.webm

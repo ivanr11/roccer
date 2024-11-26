@@ -1,0 +1,348 @@
+
+{% extends '_layout.html' %}
+
+{% block title %}Roccer | Post{% endblock %}
+
+{% block style %}
+<style>
+.post-container {
+  padding-top: 20pt;
+  padding-left: 20pt;
+  padding-right: 20pt;
+  padding-bottom: 1pt;
+  background-color: white;
+}
+.container-h {
+  padding-top: 5pt;
+  padding-bottom: 5pt;
+  max-width: 600pt;
+
+}
+.header-container {
+  display: flex;
+}
+.vote-container {
+  display: flex ;
+  flex-direction: column;
+  padding-right: 50px;
+  width: 25px;
+}
+
+.comment-text{
+    padding-bottom: 20px;
+    padding-left: 50px;
+}
+
+.content-container {
+  padding-left: 50px;
+}
+
+.container {
+  background-color: #DBE0E5;
+}
+
+.reply-container{
+    padding-left: 50px;
+    width: auto;
+    max-width: 600px;
+}
+
+.reply-btn{
+    display: flex;
+    justify-content: right;
+}
+
+#textComment{
+    height: 150px;
+}
+
+
+.vote-button {
+    display: inline-block;
+    height: 30px;
+    padding: 0;
+    margin: 0;
+    vertical-align: top;
+    width: 30px;
+    outline:  none;
+    border: none;
+    background-color: white;
+}
+
+.upvote img {
+    display: block;
+    height: 25px;  
+    width: 25px;
+}
+
+.downvote img {
+    display: block;
+    height: 25px;  
+    width: 25px;
+}
+
+.center {
+  margin: auto;
+  width:25px;
+  text-align: center;
+
+}
+
+.background {
+    background-color: #DBE0E5;
+  }
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  width: 80vw;
+  height: 80vh;
+  border: 2px solid blue;
+  min-height: 0;
+}
+
+.frame {
+ flex: 1 1 auto;
+ border: 0;
+}
+
+.light {
+  color: gray;
+}
+
+.comment-container{
+  position: relative;
+  display: flex;
+  padding:20px;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: #fff;
+  background-clip: border-box;
+  border-radius: 11px;
+ }
+
+ .comment-text{
+  padding-left: 20px;
+  padding-top: 15px;
+ }
+
+ #profile-image{
+    width: 60px;
+    height: 60px;
+ }
+
+
+.reply-box{
+  padding-left: 50px;
+  width: auto;
+  max-width: 500px;
+}
+
+.icon{
+  border-radius: 50%;
+}
+
+.individual-comment{
+  border-bottom: 0.5px solid grey;
+  padding-top: 15px;
+}
+
+
+</style>
+{% endblock %}
+{% block body %}
+
+<script src="https://code.jquery.com/jquery-3.5.1.js"
+integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+crossorigin="anonymous"></script>
+
+<script>
+  function updatePostVoteUI(vote_count, vote_state) {
+    if (vote_count != null) {
+      document.getElementById("count").innerHTML = vote_count;
+    }
+    switch (vote_state) {
+      case 0:
+        document.getElementById("downvote").innerHTML = '<img src="static/assets/downvote-unselected.png">';
+        document.getElementById("upvote").innerHTML = '<img src="static/assets/upvote-unselected.png">';
+        break
+      case 1:
+        document.getElementById("upvote").innerHTML = '<img src="static/assets/upvote-selected.png">';
+        document.getElementById("downvote").innerHTML = '<img src="static/assets/downvote-unselected.png">';
+        break
+      case 2:
+        document.getElementById("downvote").innerHTML = '<img src="static/assets/downvote-selected.png">';
+        document.getElementById("upvote").innerHTML = '<img src="static/assets/upvote-unselected.png">';
+        break
+      default:
+        break
+    }
+  }
+
+
+  function votePressed(postID, vote) {
+    newState = 0
+    if (vote == "upvote") {
+      newState = 1
+    } else {
+      newState = 2
+    }
+    $.ajax({
+      type: 'POST',
+      url: '/updatePostVotes',
+      data: {
+        post: postID,
+        vote: newState
+      },
+      success: function (data) {
+        if (data["status"] == "200") {
+          updatePostVoteUI( data["vote_count"], data["state"]);
+        } else {
+          window.location.replace("/login_page");
+        }
+
+      },
+    })
+  }
+
+  // const replyButton = document.getElementById('reply-buttons');
+
+  // replyButton.addEventListener('click', e=>{
+  //   console.log('fuck');
+  //     // e.target.classList.toggle('hide');
+  // });
+
+//   var grabBtn = document.getElementById('.new-btn');
+ 
+//   grabBtn.addEventListener('click', e=>{
+//     const grabNewSection = document.querySelector("reply-buttons");
+//     grabNewSection.classList.toggle('hide');
+
+// });
+
+</script>
+
+<div class="background">
+  <div class="container container-h">
+    <div class="post-container">
+      <div class="header-container">
+        <div class="vote-container">
+          <button id="upvote" class="vote-button upvote"
+            onclick="votePressed('{{post.post_id}}', 'upvote')">
+            {% if vote_state == 0 %}
+              <img src="static/assets/upvote-unselected.png">
+            {% endif %}
+            {% if vote_state == 1 %}
+              <img src="static/assets/upvote-selected.png">
+            {% endif %}
+            {% if vote_state == 2 %}
+              <img src="static/assets/upvote-unselected.png">
+            {% endif %}
+
+          </button>
+          <h6 id="count" class="center">{{post.get_vote_count()}}</h6>
+          <button id="downvote" class="vote-button downvote"
+            onclick="votePressed('{{post.post_id}}', 'downvote')">
+            {% if vote_state == 0 %}
+              <img src="static/assets/downvote-unselected.png">
+            {% endif %}
+            {% if vote_state == 1 %}
+              <img src="static/assets/downvote-unselected.png">
+            {% endif %}
+            {% if vote_state == 2 %}
+              <img src="static/assets/downvote-selected.png">
+            {% endif %}
+
+          </button>
+        </div>
+        <div>
+          <div class="post-header">
+            <span class="">Posted by u/</span>
+            <span>{{post.posted_by.username}}</span>
+            <span class="header-dot-divider">.</span>
+            <span>{{post.get_time_text()}}</span>
+          </div>
+
+          <div class="post-title">
+            <h3>{{post.title}}</h3>
+          </div>
+          </a>
+        </div>
+      </div>
+      <div class="content-container">
+        {% if post.post_type == "text" %}
+        <div class="text-post">
+          <p> {{post.post_text}}</p>
+        </div>
+        {% endif %}
+
+        {% if post.post_type == "embedded_video" %}
+        <div class="embedded_vid">
+          <iframe src='{{post.embedded_video_link}}' frameborder="0" allowfullscreen>
+
+          </iframe>
+        </div>
+        {% endif %}
+        {% if post.post_type == "stored_video" %}
+        <div class="stored_vid">
+          <video controls>
+            <source src="/static/assets/post_videos/{{post.stored_video_path}}" type="video/mp4">
+          </video>
+        </div>
+        {% endif %}
+
+        {% if post.post_type == "stored_image" %}
+        <div class="stored_img">
+          <img src="/static/assets/post_images/{{post.stored_image_path}}" alt="">
+        </div>
+        {% endif %}
+      </div>
+      {% if post.comments|length != 1 %}
+      <p class="light comment"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+          class="bi bi-chat-left-dots" viewBox="0 0 16 16">
+          <path
+            d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
+          <path
+            d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+        </svg> {{post.comments|length}} comments</p>
+
+      {% else %}
+      <p class="light comment"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+          class="bi bi-chat-left-dots" viewBox="0 0 16 16">
+          <path
+            d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
+          <path
+            d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+        </svg> {{post.comments|length}} comment</p>
+      {% endif %}
+      
+
+      <div class="reply-container"> 
+        <form method="post" action="/reply-comment/{{post.post_id}}"> 
+          <div class="mb-3">
+            <input class="form-control" name="text" id="textComment" rows="5">
+          </div>
+          <div class="reply-btn"> 
+            <button type="submit" class="btn btn-primary">Comment</button> 
+          </div>
+              
+        </form>
+      </div>
+       
+      <div class="comment-container">
+      {% for comment in post.comments|reverse %} 
+        <div class="individual-comment"> 
+          <img src="/static/assets/profile-pics/{{ comment.commented_by.profile_path }}" width= "35" height="35" alt="Admin" class="icon">
+          <span class="light">Commented by {{comment.commented_by.username}} {{comment.get_time_text()}} </span>
+          <div class="comment-text"> 
+            <p> {{comment.comment_text}} </p>
+
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
